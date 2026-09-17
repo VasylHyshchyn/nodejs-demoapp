@@ -210,3 +210,8 @@ See [deployment folder](./deploy) for deploying into Kubernetes with Helm or int
 - Aug 2017 - Minor changes and fixes for CRLF stuff
 - July 2017 - Updated Dockerfile to use super tiny Alpine Node 6 image
 - June 2017 - Moved repo to Github
+
+## Terraform deployment
+
+This fork is used for the Terraform AWS deployment task.
+The application is deployed in Docker on EC2 instances managed by an Auto Scaling Group and exposed through an Application Load Balancer.
