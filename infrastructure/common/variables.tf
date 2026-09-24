@@ -50,8 +50,3 @@ variable "availability_zone_b" {
   description = "Availability Zone for public subnet B"
   type        = string
 }
-
-variable "alb_name" {
-  description = "ALB name"
-  type        = string
-}
