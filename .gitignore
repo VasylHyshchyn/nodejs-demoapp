@@ -11,7 +11,6 @@ myparams.json
 .terraform/
 *.tfstate
 *.tfstate.*
-*.tfvars
 
 # Terraform crash logs
 crash.log
