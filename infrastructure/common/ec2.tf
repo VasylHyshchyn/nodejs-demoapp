@@ -1,11 +1,10 @@
-
 data "aws_ssm_parameter" "al2023_ami" {
   name = "/aws/service/ami-amazon-linux-latest/al2023-ami-kernel-default-x86_64"
 }
 
-//Adding instance definition
+// Adding instance definition
 resource "aws_launch_template" "app" {
-  name_prefix   = "nodejs-demoapp-"
+  name_prefix   = "nodejs-demoapp-${var.environment}-"
   image_id      = data.aws_ssm_parameter.al2023_ami.value
   instance_type = var.instance_type
 
@@ -19,19 +18,19 @@ resource "aws_launch_template" "app" {
     resource_type = "instance"
 
     tags = {
-      Name        = "nodejs-demoapp"
-      Environment = "dev"
+      Name        = "nodejs-demoapp-${var.environment}"
+      Environment = var.environment
     }
   }
 }
 
-//Adding ASG
+// Adding ASG
 resource "aws_autoscaling_group" "app" {
-  name = "nodejs-demoapp-asg"
+  name = "nodejs-demoapp-${var.environment}-asg"
 
-  min_size         = 1
-  max_size         = 2
-  desired_capacity = 1
+  min_size         = var.min_size
+  max_size         = var.max_size
+  desired_capacity = var.min_size
 
   vpc_zone_identifier = [
     aws_subnet.public_a.id,
@@ -51,13 +50,13 @@ resource "aws_autoscaling_group" "app" {
 
   tag {
     key                 = "Name"
-    value               = "nodejs-demoapp"
+    value               = "nodejs-demoapp-${var.environment}"
     propagate_at_launch = true
   }
 
   tag {
     key                 = "Environment"
-    value               = "dev"
+    value               = var.environment
     propagate_at_launch = true
   }
 }

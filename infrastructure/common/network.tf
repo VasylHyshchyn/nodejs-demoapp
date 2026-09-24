@@ -1,53 +1,53 @@
-//Netowrk configuration
+// Network configuration
 
-//VPC Creation
+// VPC Creation
 resource "aws_vpc" "app_vpc" {
-  cidr_block           = "10.0.0.0/16"
+  cidr_block           = var.vpc_cidr
   enable_dns_hostnames = true
   enable_dns_support   = true
 
   tags = {
-    Name        = "nodejs-demoapp-vpc"
-    Environment = "dev"
+    Name        = "nodejs-demoapp-${var.environment}-vpc"
+    Environment = var.environment
   }
 }
 
-//VPC subnets
+// VPC subnets
 resource "aws_subnet" "public_a" {
   vpc_id                  = aws_vpc.app_vpc.id
-  cidr_block              = "10.0.1.0/24"
-  availability_zone       = "eu-central-1a"
+  cidr_block              = var.public_subnet_a_cidr
+  availability_zone       = var.availability_zone_a
   map_public_ip_on_launch = true
 
   tags = {
-    Name        = "nodejs-demoapp-public-a"
-    Environment = "dev"
+    Name        = "nodejs-demoapp-${var.environment}-public-a"
+    Environment = var.environment
   }
 }
 
 resource "aws_subnet" "public_b" {
   vpc_id                  = aws_vpc.app_vpc.id
-  cidr_block              = "10.0.2.0/24"
-  availability_zone       = "eu-central-1b"
+  cidr_block              = var.public_subnet_b_cidr
+  availability_zone       = var.availability_zone_b
   map_public_ip_on_launch = true
 
   tags = {
-    Name        = "nodejs-demoapp-public-b"
-    Environment = "dev"
+    Name        = "nodejs-demoapp-${var.environment}-public-b"
+    Environment = var.environment
   }
 }
 
-//Inetrnet gateway
+// Internet gateway
 resource "aws_internet_gateway" "app_igw" {
   vpc_id = aws_vpc.app_vpc.id
 
   tags = {
-    Name        = "nodejs-demoapp-igw"
-    Environment = "dev"
+    Name        = "nodejs-demoapp-${var.environment}-igw"
+    Environment = var.environment
   }
 }
 
-//Route table for roting traffic outside
+// Route table for routing traffic outside
 resource "aws_route_table" "public" {
   vpc_id = aws_vpc.app_vpc.id
 
@@ -57,12 +57,12 @@ resource "aws_route_table" "public" {
   }
 
   tags = {
-    Name        = "nodejs-demoapp-public-rt"
-    Environment = "dev"
+    Name        = "nodejs-demoapp-${var.environment}-public-rt"
+    Environment = var.environment
   }
 }
 
-//Attaching table to the Subnets
+// Attaching table to the subnets
 resource "aws_route_table_association" "public_a" {
   subnet_id      = aws_subnet.public_a.id
   route_table_id = aws_route_table.public.id
@@ -73,10 +73,11 @@ resource "aws_route_table_association" "public_b" {
   route_table_id = aws_route_table.public.id
 }
 
-//Security groups
-//Adding SG for ALB
+// Security groups
+
+// Adding SG for ALB
 resource "aws_security_group" "alb" {
-  name        = "nodejs-demoapp-alb-sg"
+  name        = "nodejs-demoapp-${var.environment}-alb-sg"
   description = "Security group for Node.js demoapp ALB"
   vpc_id      = aws_vpc.app_vpc.id
 
@@ -97,14 +98,14 @@ resource "aws_security_group" "alb" {
   }
 
   tags = {
-    Name        = "nodejs-demoapp-alb-sg"
-    Environment = "dev"
+    Name        = "nodejs-demoapp-${var.environment}-alb-sg"
+    Environment = var.environment
   }
 }
 
-//Adding SG for EC2
+// Adding SG for EC2
 resource "aws_security_group" "ec2" {
-  name        = "nodejs-demoapp-ec2-sg"
+  name        = "nodejs-demoapp-${var.environment}-ec2-sg"
   description = "Security group for Node.js demoapp EC2 instances"
   vpc_id      = aws_vpc.app_vpc.id
 
@@ -125,17 +126,16 @@ resource "aws_security_group" "ec2" {
   }
 
   tags = {
-    Name        = "nodejs-demoapp-ec2-sg"
-    Environment = "dev"
+    Name        = "nodejs-demoapp-${var.environment}-ec2-sg"
+    Environment = var.environment
   }
 }
 
+// ALB
 
-//ALB
-
-//Adding target groups
+// Adding target group
 resource "aws_lb_target_group" "app" {
-  name     = "nodejs-demoapp-tg"
+  name     = "nodejs-demoapp-${var.environment}-tg"
   port     = 3000
   protocol = "HTTP"
   vpc_id   = aws_vpc.app_vpc.id
@@ -152,14 +152,14 @@ resource "aws_lb_target_group" "app" {
   }
 
   tags = {
-    Name        = "nodejs-demoapp-tg"
-    Environment = "dev"
+    Name        = "nodejs-demoapp-${var.environment}-tg"
+    Environment = var.environment
   }
 }
 
-//Adding ALB
+// Adding ALB
 resource "aws_lb" "app" {
-  name               = "nodejs-demoapp-alb"
+  name               = "nodejs-demoapp-${var.environment}-alb"
   internal           = false
   load_balancer_type = "application"
 
@@ -173,12 +173,12 @@ resource "aws_lb" "app" {
   ]
 
   tags = {
-    Name        = "nodejs-demoapp-alb"
-    Environment = "dev"
+    Name        = "nodejs-demoapp-${var.environment}-alb"
+    Environment = var.environment
   }
 }
 
-//Adding listener
+// Adding listener
 resource "aws_lb_listener" "http" {
   load_balancer_arn = aws_lb.app.arn
   port              = 80
@@ -190,7 +190,7 @@ resource "aws_lb_listener" "http" {
   }
 
   tags = {
-    Name        = "nodejs-demoapp-http-listener"
-    Environment = "dev"
+    Name        = "nodejs-demoapp-${var.environment}-http-listener"
+    Environment = var.environment
   }
 }
